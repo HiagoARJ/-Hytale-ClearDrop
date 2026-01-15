@@ -1,7 +1,12 @@
-package com.seuusuario.cleaner;
+package com.Hiag0.clearlag;
 
+import net.hytale.api.HytaleServer; // Assuming this is the entry point or similar
 import net.hytale.api.plugin.Plugin;
 import net.hytale.api.scheduler.Scheduler;
+import net.hytale.api.Server;
+import net.hytale.api.World;
+import net.hytale.api.entities.Entity;
+import net.hytale.api.entities.EntityType;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.File;
@@ -10,7 +15,7 @@ import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
-public class ItemCleanerMod extends Plugin {
+public class ClearLag extends Plugin {
 
     private final Logger logger;
     private final Server server; // Instância do servidor para acessar os mundos
@@ -19,7 +24,7 @@ public class ItemCleanerMod extends Plugin {
     private int minutosExecucao = 5;
     private int segundosAviso = 5;
 
-    public ItemCleanerMod(Logger logger, Server server) {
+    public ClearLag(Logger logger, Server server) {
         this.logger = logger;
         this.server = server;
     }

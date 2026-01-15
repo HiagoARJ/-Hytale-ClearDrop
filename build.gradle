@@ -7,18 +7,18 @@ version = '1.0.0'
 
 repositories {
     mavenCentral()
-    maven {
-        name = 'HytaleRepo'
-        url = 'https://repo.hytale.com/maven' // Repositório hipotético oficial
+    flatDir {
+        dirs 'libs'
     }
 }
 
 dependencies {
-    // A API oficial do servidor
-    compileOnly 'com.hytale:server-api:1.0.0-SNAPSHOT'
+    // A API oficial do servidor (deve ser colocada na pasta libs)
+    compileOnly name: 'hytale-server'
     
-    // Bibliotecas úteis para VoIP (exemplo)
-    implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    // Bibliotecas úteis
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
 }
 
 targetCompatibility = JavaVersion.VERSION_21 // Hytale roda em Java moderno
