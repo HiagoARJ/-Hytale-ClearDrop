@@ -1,0 +1,10 @@
+{
+    "id": "item-cleaner",
+    "name": "Limpador de Itens",
+    "version": "1.0.0",
+    "main": "com.Hiag0.cleaner.ItemCleanerMod",
+    "description": "Remove itens do chão a cada 5 minutos.",
+    "dependencies": {
+        "hytale-server": ">=1.0.0"
+    }
+}

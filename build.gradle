@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.Hiag0'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'HytaleRepo'
+        url = 'https://repo.hytale.com/maven' // Repositório hipotético oficial
+    }
+}
+
+dependencies {
+    // A API oficial do servidor
+    compileOnly 'com.hytale:server-api:1.0.0-SNAPSHOT'
+    
+    // Bibliotecas úteis para VoIP (exemplo)
+    implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+}
+
+targetCompatibility = JavaVersion.VERSION_21 // Hytale roda em Java moderno

@@ -1,0 +1,8 @@
+{
+    "minutesExecution": 3,
+    "cleanupWarningSeconds": 10,
+    "messages": {
+        "warning": "§e[Aviso] §fLimpando itens do chão em {segundos} segundos!",
+        "success": "§a[Limpeza] §fTotal de {quantidade} itens removidos."
+    }
+}
