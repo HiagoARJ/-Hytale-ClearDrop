@@ -1,40 +1,93 @@
 package com.Hiag0.clearlag.messages;
 
+import com.Hiag0.clearlag.ClearLag;
+import com.Hiag0.clearlag.config.LanguageConfig;
 import com.hypixel.hytale.server.core.Message;
 import java.awt.Color;
 
 public class Messages {
 
-    public static final String PREFIX_TEXT = "[ClearLag] ";
+    private static LanguageConfig getLang() {
+        return ClearLag.LANG_CONFIG.get();
+    }
 
-    public static final Message STARTUP = Message.raw(PREFIX_TEXT + "ClearLag iniciado. Limpeza agendada.")
-            .color(Color.GREEN);
+    public static Message getStartup() {
+        return Message.raw(getLang().prefix + getLang().startup).color(Color.GREEN);
+    }
 
     public static Message scheduleInfo(int minutes) {
-        return Message.raw(PREFIX_TEXT + "Limpeza a cada " + minutes + " minutos.").color(Color.GREEN);
-    }
-
-    public static Message warning(int seconds) {
-        return Message.raw(PREFIX_TEXT + "Limpeza em " + seconds + " segundos...").color(Color.YELLOW);
-    }
-
-    public static final Message CLEANUP_STARTED = Message.raw(PREFIX_TEXT + "Executando limpeza agendada...")
-            .color(Color.ORANGE);
-
-    public static Message nextCleanup(int minutes) {
-        return Message.raw(PREFIX_TEXT + "Proxima limpeza em " + minutes + " minutos.").color(Color.GREEN);
-    }
-
-    public static Message manualCleanupStart(String worldName) {
-        return Message.raw(PREFIX_TEXT + "Iniciando limpeza manual no mundo: " + worldName).color(Color.YELLOW);
-    }
-
-    public static Message cleanupFinished(String worldName, int count) {
-        return Message.raw(PREFIX_TEXT + "Varredura finalizada no mundo " + worldName + ". Itens removidos: " + count)
+        return Message.raw(getLang().prefix + getLang().scheduleInfo.replace("{minutes}", String.valueOf(minutes)))
                 .color(Color.GREEN);
     }
 
-    public static Message logError(String error) {
-        return Message.raw(PREFIX_TEXT + "Erro ao gravar debug log: " + error).color(Color.RED);
+    public static Message warning(int seconds) {
+        return Message.raw(getLang().prefix + getLang().warning.replace("{seconds}", String.valueOf(seconds)))
+                .color(Color.YELLOW);
+    }
+
+    public static Message getCleanupStarted() {
+        return Message.raw(getLang().prefix + getLang().cleanupStarted).color(Color.ORANGE);
+    }
+
+    public static Message nextCleanup(int minutes) {
+        return Message.raw(getLang().prefix + getLang().nextCleanup.replace("{minutes}", String.valueOf(minutes)))
+                .color(Color.GREEN);
+    }
+
+    public static Message manualCleanupStart(String worldName) {
+        return Message.raw(getLang().prefix + getLang().manualCleanupStart.replace("{world}", worldName))
+                .color(Color.YELLOW);
+    }
+
+    public static Message cleanupFinished(String worldName, int count) {
+        return Message.raw(getLang().prefix + getLang().cleanupFinished
+                .replace("{world}", worldName)
+                .replace("{count}", String.valueOf(count))).color(Color.GREEN);
+    }
+
+    public static Message getForceCleanup() {
+        return Message.raw(getLang().prefix + getLang().forceCleanup).color(Color.GREEN);
+    }
+
+    public static Message getInvalidNumber() {
+        return Message.raw(getLang().prefix + getLang().invalidNumber).color(Color.RED);
+    }
+
+    public static Message getMustBePositive() {
+        return Message.raw(getLang().prefix + getLang().mustBePositive).color(Color.RED);
+    }
+
+    public static Message getUsageAuto() {
+        return Message.raw(getLang().prefix + getLang().usageAuto).color(Color.RED);
+    }
+
+    public static Message getUsageNotice() {
+        return Message.raw(getLang().prefix + getLang().usageNotice).color(Color.RED);
+    }
+
+    public static Message intervalChanged(int minutes) {
+        return Message.raw(getLang().prefix + getLang().intervalChanged.replace("{minutes}", String.valueOf(minutes)))
+                .color(Color.GREEN);
+    }
+
+    public static Message warningChanged(int seconds) {
+        return Message.raw(getLang().prefix + getLang().warningChanged.replace("{seconds}", String.valueOf(seconds)))
+                .color(Color.GREEN);
+    }
+
+    public static Message getHelpTitle() {
+        return Message.raw(getLang().helpTitle).color(Color.YELLOW);
+    }
+
+    public static Message getHelpNow() {
+        return Message.raw(getLang().helpNow).color(Color.BLUE);
+    }
+
+    public static Message getHelpAuto() {
+        return Message.raw(getLang().helpAuto).color(Color.BLUE);
+    }
+
+    public static Message getHelpNotice() {
+        return Message.raw(getLang().helpNotice).color(Color.BLUE);
     }
 }

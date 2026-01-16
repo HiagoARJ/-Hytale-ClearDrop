@@ -1,25 +1,36 @@
 package com.Hiag0.clearlag.command;
 
+import com.Hiag0.clearlag.command.subcommand.ClearAutoCommand;
+import com.Hiag0.clearlag.command.subcommand.ClearNoticeCommand;
+import com.Hiag0.clearlag.command.subcommand.ClearNowCommand;
+import com.Hiag0.clearlag.messages.Messages;
 import com.Hiag0.clearlag.service.CleanupService;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.basecommands.AbstractWorldCommand;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
+import java.util.concurrent.CompletableFuture;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-public class ClearCommand extends AbstractWorldCommand {
-
-    private final CleanupService cleanupService;
+public class ClearCommand extends AbstractAsyncCommand {
 
     public ClearCommand(CleanupService cleanupService) {
-        super("limpar", "Força a limpeza de itens");
-        this.cleanupService = cleanupService;
+        super("clear", "Main command of ClearDrops");
+
+        this.addSubCommand(new ClearNowCommand(cleanupService));
+        this.addSubCommand(new ClearAutoCommand(cleanupService));
+        this.addSubCommand(new ClearNoticeCommand());
     }
 
+    @NonNullDecl
     @Override
-    protected void execute(CommandContext ctx, World world, Store<EntityStore> store) {
-        ctx.sendMessage(Message.translation("Executando limpeza nativa de itens..."));
-        cleanupService.realizarRemocaoNoMundo(world);
+    protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
+        sendHelp(ctx);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private void sendHelp(CommandContext ctx) {
+        ctx.sendMessage(Messages.getHelpTitle());
+        ctx.sendMessage(Messages.getHelpNow());
+        ctx.sendMessage(Messages.getHelpAuto());
+        ctx.sendMessage(Messages.getHelpNotice());
     }
 }

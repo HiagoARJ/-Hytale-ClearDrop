@@ -31,4 +31,12 @@ public class ClearLagConfig {
     public int getCleanupWarningSeconds() {
         return cleanupWarningSeconds;
     }
+
+    public void setMinutesExecution(int minutesExecution) {
+        this.minutesExecution = minutesExecution;
+    }
+
+    public void setCleanupWarningSeconds(int cleanupWarningSeconds) {
+        this.cleanupWarningSeconds = cleanupWarningSeconds;
+    }
 }

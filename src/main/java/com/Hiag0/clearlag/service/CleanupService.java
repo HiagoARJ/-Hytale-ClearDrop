@@ -19,6 +19,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ public class CleanupService {
 
     private final ClearLagConfig config;
     private final JavaPlugin plugin;
+    private ScheduledFuture<?> scheduledTask;
 
     public CleanupService(ClearLagConfig config, JavaPlugin plugin) {
         this.config = config;
@@ -38,7 +40,7 @@ public class CleanupService {
             return;
 
         // Agendar a execução periódica
-        HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
+        this.scheduledTask = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
                 this::iniciarCicloLimpeza,
                 config.getMinutesExecution(),
                 config.getMinutesExecution(),
@@ -47,12 +49,24 @@ public class CleanupService {
         broadcast(Messages.scheduleInfo(config.getMinutesExecution()));
     }
 
+    public void cancelTask() {
+        if (scheduledTask != null && !scheduledTask.isCancelled()) {
+            scheduledTask.cancel(false);
+            scheduledTask = null;
+        }
+    }
+
+    public void reschedule() {
+        cancelTask();
+        scheduleCleanup();
+    }
+
     public void iniciarCicloLimpeza() {
         int segundosAviso = config.getCleanupWarningSeconds();
         broadcast(Messages.warning(segundosAviso));
 
         HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-            broadcast(Messages.CLEANUP_STARTED);
+            broadcast(Messages.getCleanupStarted());
             executarLimpezaGeral();
         }, segundosAviso, TimeUnit.SECONDS);
     }
@@ -62,7 +76,7 @@ public class CleanupService {
         try {
             Universe.get().sendMessage(message);
         } catch (Exception e) {
-            // Ignorar erro se o universo não estiver pronto
+            // Ignore error if universe is not ready
         }
     }
 
@@ -75,7 +89,7 @@ public class CleanupService {
                 });
             }
         } catch (Exception e) {
-            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Erro ao executar limpeza agendada: " + e.getMessage());
+            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Error executing scheduled cleanup: " + e.getMessage());
         }
 
         broadcast(Messages.nextCleanup(config.getMinutesExecution()));
@@ -98,7 +112,7 @@ public class CleanupService {
         File logFile = new File(plugin.getDataDirectory().toFile(), "clearlag_debug.log");
 
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
-            pw.println("--- Iniciando Varredura Híbrida: " + new Date() + " ---");
+            pw.println("--- Starting Hybrid Scan: " + new Date() + " ---");
 
             store.forEachEntityParallel(
                     (int index, ArchetypeChunk<EntityStore> chunk, CommandBuffer<EntityStore> buffer) -> {
@@ -121,14 +135,14 @@ public class CleanupService {
             }
 
             final int finalRemovidos = removidosSubtotal;
-            pw.println("Varredura finalizada. Analisados: " + totalIterado.get() + " | Removidos: " + finalRemovidos);
+            pw.println("Scan finished. Analyzed: " + totalIterado.get() + " | Removed: " + finalRemovidos);
             pw.println("-------------------------------------------");
             pw.flush();
 
             broadcast(Messages.cleanupFinished(worldName, finalRemovidos));
 
         } catch (Exception e) {
-            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Erro ao gravar debug log: " + e.getMessage());
+            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Error writing debug log: " + e.getMessage());
         }
     }
 
