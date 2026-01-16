@@ -1,7 +1,7 @@
-package com.Hiag0.clearlag.service;
+package com.Hiag0.cleardrop.service;
 
-import com.Hiag0.clearlag.config.ClearLagConfig;
-import com.Hiag0.clearlag.messages.Messages;
+import com.Hiag0.cleardrop.config.ClearDropConfig;
+import com.Hiag0.cleardrop.messages.Messages;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.RemoveReason;
@@ -26,11 +26,11 @@ import java.util.logging.Level;
 
 public class CleanupService {
 
-    private final ClearLagConfig config;
+    private final ClearDropConfig config;
     private final JavaPlugin plugin;
     private ScheduledFuture<?> scheduledTask;
 
-    public CleanupService(ClearLagConfig config, JavaPlugin plugin) {
+    public CleanupService(ClearDropConfig config, JavaPlugin plugin) {
         this.config = config;
         this.plugin = plugin;
     }
@@ -39,9 +39,9 @@ public class CleanupService {
         if (config.getMinutesExecution() <= 0)
             return;
 
-        // Agendar a execução periódica
+        // Schedule periodic execution
         this.scheduledTask = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
-                this::iniciarCicloLimpeza,
+                this::startCleanupCycle,
                 config.getMinutesExecution(),
                 config.getMinutesExecution(),
                 TimeUnit.MINUTES);
@@ -61,14 +61,14 @@ public class CleanupService {
         scheduleCleanup();
     }
 
-    public void iniciarCicloLimpeza() {
-        int segundosAviso = config.getCleanupWarningSeconds();
-        broadcast(Messages.warning(segundosAviso));
+    public void startCleanupCycle() {
+        int warningSeconds = config.getCleanupWarningSeconds();
+        broadcast(Messages.warning(warningSeconds));
 
         HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
             broadcast(Messages.getCleanupStarted());
-            executarLimpezaGeral();
-        }, segundosAviso, TimeUnit.SECONDS);
+            executeFullCleanup();
+        }, warningSeconds, TimeUnit.SECONDS);
     }
 
     private void broadcast(Message message) {
@@ -80,22 +80,22 @@ public class CleanupService {
         }
     }
 
-    public void executarLimpezaGeral() {
+    public void executeFullCleanup() {
         try {
             Universe universe = Universe.get();
             if (universe != null && universe.getWorlds() != null) {
                 universe.getWorlds().values().forEach(world -> {
-                    world.execute(() -> realizarRemocaoNoMundo(world));
+                    world.execute(() -> performWorldRemoval(world));
                 });
             }
         } catch (Exception e) {
-            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Error executing scheduled cleanup: " + e.getMessage());
+            plugin.getLogger().at(Level.SEVERE).log("[ClearDrop] Error executing scheduled cleanup: " + e.getMessage());
         }
 
         broadcast(Messages.nextCleanup(config.getMinutesExecution()));
     }
 
-    public void realizarRemocaoNoMundo(World world) {
+    public void performWorldRemoval(World world) {
         if (world == null)
             return;
 
@@ -107,48 +107,48 @@ public class CleanupService {
         Store<EntityStore> store = entityStore.getStore();
         broadcast(Messages.manualCleanupStart(worldName));
 
-        final AtomicInteger totalIterado = new AtomicInteger(0);
-        final ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> filaRemocao = new ConcurrentLinkedQueue<>();
-        File logFile = new File(plugin.getDataDirectory().toFile(), "clearlag_debug.log");
+        final AtomicInteger totalAnalyzed = new AtomicInteger(0);
+        final ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> removalQueue = new ConcurrentLinkedQueue<>();
+        File logFile = new File(plugin.getDataDirectory().toFile(), "cleardrop_debug.log");
 
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
             pw.println("--- Starting Hybrid Scan: " + new Date() + " ---");
 
             store.forEachEntityParallel(
                     (int index, ArchetypeChunk<EntityStore> chunk, CommandBuffer<EntityStore> buffer) -> {
-                        totalIterado.incrementAndGet();
+                        totalAnalyzed.incrementAndGet();
                         com.hypixel.hytale.component.Archetype<EntityStore> arch = chunk.getArchetype();
 
                         if (arch != null) {
-                            processArchetype(index, arch, chunk, filaRemocao, pw);
+                            processArchetype(index, arch, chunk, removalQueue, pw);
                         }
                     });
 
-            // Remover entidades marcadas
-            int removidosSubtotal = 0;
-            for (com.hypixel.hytale.component.Ref<EntityStore> ref : filaRemocao) {
+            // Remove marked entities
+            int removedSubtotal = 0;
+            for (com.hypixel.hytale.component.Ref<EntityStore> ref : removalQueue) {
                 try {
                     store.removeEntity(ref, RemoveReason.REMOVE);
-                    removidosSubtotal++;
+                    removedSubtotal++;
                 } catch (Exception ignored) {
                 }
             }
 
-            final int finalRemovidos = removidosSubtotal;
-            pw.println("Scan finished. Analyzed: " + totalIterado.get() + " | Removed: " + finalRemovidos);
+            final int finalRemoved = removedSubtotal;
+            pw.println("Scan finished. Analyzed: " + totalAnalyzed.get() + " | Removed: " + finalRemoved);
             pw.println("-------------------------------------------");
             pw.flush();
 
-            broadcast(Messages.cleanupFinished(worldName, finalRemovidos));
+            broadcast(Messages.cleanupFinished(worldName, finalRemoved));
 
         } catch (Exception e) {
-            plugin.getLogger().at(Level.SEVERE).log("[ClearLag] Error writing debug log: " + e.getMessage());
+            plugin.getLogger().at(Level.SEVERE).log("[ClearDrop] Error writing debug log: " + e.getMessage());
         }
     }
 
     private void processArchetype(int index, com.hypixel.hytale.component.Archetype<EntityStore> arch,
             ArchetypeChunk<EntityStore> chunk,
-            ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> filaRemocao,
+            ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> removalQueue,
             PrintWriter pw) {
         StringBuilder sb = new StringBuilder();
         sb.append("Index ").append(index).append(" [");
@@ -178,8 +178,8 @@ public class CleanupService {
         sb.append("][").append(count).append("]");
 
         if ((count >= 11 && count <= 13) || (!hasInvalid && matches == 3 && count <= 4)) {
-            filaRemocao.add(chunk.getReferenceTo(index));
-            sb.append(" <<< MARCADO P/ REMOÇÃO >>>");
+            removalQueue.add(chunk.getReferenceTo(index));
+            sb.append(" <<< MARKED FOR REMOVAL >>>");
         }
 
         synchronized (pw) {

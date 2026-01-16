@@ -1,14 +1,14 @@
-package com.Hiag0.clearlag.messages;
+package com.Hiag0.cleardrop.messages;
 
-import com.Hiag0.clearlag.ClearLag;
-import com.Hiag0.clearlag.config.LanguageConfig;
+import com.Hiag0.cleardrop.ClearDrop;
+import com.Hiag0.cleardrop.config.LanguageConfig;
 import com.hypixel.hytale.server.core.Message;
 import java.awt.Color;
 
 public class Messages {
 
     private static LanguageConfig getLang() {
-        return ClearLag.LANG_CONFIG.get();
+        return ClearDrop.LANG_CONFIG.get();
     }
 
     public static Message getStartup() {

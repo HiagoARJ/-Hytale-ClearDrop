@@ -1,8 +1,8 @@
 {
-    "Group": "com.Hiag0.clearlag",
-    "Name": "ClearLag",
+    "Group": "com.Hiag0.cleardrop",
+    "Name": "ClearDrop",
     "Version": "1.0.0",
-    "Main": "com.Hiag0.clearlag.ClearLag",
-    "Description": "Item cleaner for Hytale.",
+    "Main": "com.Hiag0.cleardrop.ClearDrop",
+    "Description": "Item cleaner for Hytale (Clear Drop).",
     "ServerVersion": ">=1.0.0"
 }

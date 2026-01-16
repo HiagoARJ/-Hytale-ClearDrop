@@ -1,8 +1,8 @@
-package com.Hiag0.clearlag.command.subcommand;
+package com.Hiag0.cleardrop.command.subcommand;
 
-import com.Hiag0.clearlag.ClearLag;
-import com.Hiag0.clearlag.messages.Messages;
-import com.Hiag0.clearlag.service.CleanupService;
+import com.Hiag0.cleardrop.ClearDrop;
+import com.Hiag0.cleardrop.messages.Messages;
+import com.Hiag0.cleardrop.service.CleanupService;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
@@ -31,8 +31,8 @@ public class ClearAutoCommand extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        ClearLag.CONFIG.get().setMinutesExecution(minutes);
-        ClearLag.CONFIG.save();
+        ClearDrop.CONFIG.get().setMinutesExecution(minutes);
+        ClearDrop.CONFIG.save();
         cleanupService.reschedule();
 
         ctx.sendMessage(Messages.intervalChanged(minutes).color(Color.GREEN));

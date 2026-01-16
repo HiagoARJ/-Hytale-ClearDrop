@@ -1,4 +1,4 @@
-package com.Hiag0.clearlag.config;
+package com.Hiag0.cleardrop.config;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -87,7 +87,7 @@ public class LanguageConfig {
                         .build();
 
         public String prefix = "[Clear Drop] ";
-        public String startup = "ClearLag started. Cleanup scheduled.";
+        public String startup = "ClearDrop started. Cleanup scheduled.";
         public String scheduleInfo = "Cleanup every {minutes} minutes.";
         public String warning = "Cleanup in {seconds} seconds...";
         public String cleanupStarted = "Running scheduled cleanup...";

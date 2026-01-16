@@ -1,37 +1,37 @@
-package com.Hiag0.clearlag;
+package com.Hiag0.cleardrop;
 
-import com.Hiag0.clearlag.command.ClearCommand;
-import com.Hiag0.clearlag.config.ClearLagConfig;
-import com.Hiag0.clearlag.config.LanguageConfig;
-import com.Hiag0.clearlag.service.CleanupService;
+import com.Hiag0.cleardrop.command.ClearCommand;
+import com.Hiag0.cleardrop.config.ClearDropConfig;
+import com.Hiag0.cleardrop.config.LanguageConfig;
+import com.Hiag0.cleardrop.service.CleanupService;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 
-public class ClearLag extends JavaPlugin {
+public class ClearDrop extends JavaPlugin {
 
-    public static com.hypixel.hytale.server.core.util.Config<ClearLagConfig> CONFIG;
+    public static com.hypixel.hytale.server.core.util.Config<ClearDropConfig> CONFIG;
     public static com.hypixel.hytale.server.core.util.Config<LanguageConfig> LANG_CONFIG;
 
     private CleanupService cleanupService;
 
-    public ClearLag(JavaPluginInit init) {
+    public ClearDrop(JavaPluginInit init) {
         super(init);
-        CONFIG = this.withConfig("ClearLag", ClearLagConfig.CODEC);
+        CONFIG = this.withConfig("ClearDrop", ClearDropConfig.CODEC);
         LANG_CONFIG = this.withConfig("language", LanguageConfig.CODEC);
     }
 
     @Override
     protected void start() {
-        CONFIG.save(); // Salva/Carrega
+        CONFIG.save(); // Save/Load
         LANG_CONFIG.save();
 
-        // Inicializar Serviço de Limpeza usando o config carregado
+        // Initialize Cleanup Service using loaded config
         this.cleanupService = new CleanupService(CONFIG.get(), this);
 
-        // Agendar Tarefas
+        // Schedule Tasks
         cleanupService.scheduleCleanup();
 
-        // Registrar Comandos
+        // Register Commands
         getCommandRegistry().registerCommand(new ClearCommand(cleanupService));
     }
 }

@@ -1,10 +1,10 @@
-package com.Hiag0.clearlag.command;
+package com.Hiag0.cleardrop.command;
 
-import com.Hiag0.clearlag.command.subcommand.ClearAutoCommand;
-import com.Hiag0.clearlag.command.subcommand.ClearNoticeCommand;
-import com.Hiag0.clearlag.command.subcommand.ClearNowCommand;
-import com.Hiag0.clearlag.messages.Messages;
-import com.Hiag0.clearlag.service.CleanupService;
+import com.Hiag0.cleardrop.command.subcommand.ClearAutoCommand;
+import com.Hiag0.cleardrop.command.subcommand.ClearNoticeCommand;
+import com.Hiag0.cleardrop.command.subcommand.ClearNowCommand;
+import com.Hiag0.cleardrop.messages.Messages;
+import com.Hiag0.cleardrop.service.CleanupService;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import java.util.concurrent.CompletableFuture;

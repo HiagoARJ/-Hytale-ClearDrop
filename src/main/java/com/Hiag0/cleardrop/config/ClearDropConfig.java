@@ -1,13 +1,13 @@
-package com.Hiag0.clearlag.config;
+package com.Hiag0.cleardrop.config;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 
-public class ClearLagConfig {
+public class ClearDropConfig {
 
-    public static final BuilderCodec<ClearLagConfig> CODEC = BuilderCodec
-            .builder(ClearLagConfig.class, ClearLagConfig::new)
+    public static final BuilderCodec<ClearDropConfig> CODEC = BuilderCodec
+            .builder(ClearDropConfig.class, ClearDropConfig::new)
             .append(new KeyedCodec<Integer>("MinutesExecution", Codec.INTEGER),
                     (config, value, extraInfo) -> config.minutesExecution = value,
                     (config, extraInfo) -> config.minutesExecution)
@@ -21,7 +21,7 @@ public class ClearLagConfig {
     private int minutesExecution = 1;
     private int cleanupWarningSeconds = 5;
 
-    public ClearLagConfig() {
+    public ClearDropConfig() {
     }
 
     public int getMinutesExecution() {

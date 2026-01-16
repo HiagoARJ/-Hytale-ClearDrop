@@ -1,7 +1,7 @@
-package com.Hiag0.clearlag.command.subcommand;
+package com.Hiag0.cleardrop.command.subcommand;
 
-import com.Hiag0.clearlag.messages.Messages;
-import com.Hiag0.clearlag.service.CleanupService;
+import com.Hiag0.cleardrop.messages.Messages;
+import com.Hiag0.cleardrop.service.CleanupService;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import java.awt.Color;
@@ -21,7 +21,7 @@ public class ClearNowCommand extends AbstractAsyncCommand {
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
         ctx.sendMessage(Messages.getForceCleanup().color(Color.GREEN));
-        cleanupService.executarLimpezaGeral();
+        cleanupService.executeFullCleanup();
         return CompletableFuture.completedFuture(null);
     }
 }

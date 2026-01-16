@@ -1,7 +1,7 @@
-package com.Hiag0.clearlag.command.subcommand;
+package com.Hiag0.cleardrop.command.subcommand;
 
-import com.Hiag0.clearlag.ClearLag;
-import com.Hiag0.clearlag.messages.Messages;
+import com.Hiag0.cleardrop.ClearDrop;
+import com.Hiag0.cleardrop.messages.Messages;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
@@ -28,8 +28,8 @@ public class ClearNoticeCommand extends AbstractAsyncCommand {
             return CompletableFuture.completedFuture(null);
         }
 
-        ClearLag.CONFIG.get().setCleanupWarningSeconds(seconds);
-        ClearLag.CONFIG.save();
+        ClearDrop.CONFIG.get().setCleanupWarningSeconds(seconds);
+        ClearDrop.CONFIG.save();
 
         ctx.sendMessage(Messages.warningChanged(seconds).color(Color.GREEN));
         return CompletableFuture.completedFuture(null);
