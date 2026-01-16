@@ -14,11 +14,12 @@ repositories {
 
 dependencies {
     // A API oficial do servidor (deve ser colocada na pasta libs)
-    compileOnly name: 'hytale-server'
+    compileOnly name: 'HytaleServer'
     
     // Bibliotecas úteis
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.slf4j:slf4j-api:2.0.9'
 }
 
+sourceCompatibility = JavaVersion.VERSION_21
 targetCompatibility = JavaVersion.VERSION_21 // Hytale roda em Java moderno

@@ -1,0 +1,8 @@
+{
+    "Group": "com.Hiag0.clearlag",
+    "Name": "ClearLag",
+    "Version": "1.0.0",
+    "Main": "com.Hiag0.clearlag.ClearLag",
+    "Description": "Limpador de itens para Hytale.",
+    "ServerVersion": ">=1.0.0"
+}
