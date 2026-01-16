@@ -1,0 +1,34 @@
+package com.Hiag0.clearlag.config;
+
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+
+public class ClearLagConfig {
+
+    public static final BuilderCodec<ClearLagConfig> CODEC = BuilderCodec
+            .builder(ClearLagConfig.class, ClearLagConfig::new)
+            .append(new KeyedCodec<Integer>("MinutesExecution", Codec.INTEGER),
+                    (config, value, extraInfo) -> config.minutesExecution = value,
+                    (config, extraInfo) -> config.minutesExecution)
+            .add()
+            .append(new KeyedCodec<Integer>("CleanupWarningSeconds", Codec.INTEGER),
+                    (config, value, extraInfo) -> config.cleanupWarningSeconds = value,
+                    (config, extraInfo) -> config.cleanupWarningSeconds)
+            .add()
+            .build();
+
+    private int minutesExecution = 1;
+    private int cleanupWarningSeconds = 5;
+
+    public ClearLagConfig() {
+    }
+
+    public int getMinutesExecution() {
+        return minutesExecution;
+    }
+
+    public int getCleanupWarningSeconds() {
+        return cleanupWarningSeconds;
+    }
+}
