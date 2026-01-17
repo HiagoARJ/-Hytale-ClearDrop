@@ -90,4 +90,28 @@ public class Messages {
     public static Message getHelpNotice() {
         return Message.raw(getLang().helpNotice).color(Color.BLUE);
     }
+
+    public static Message getAutoEnabled() {
+        return Message.raw(getLang().prefix + getLang().autoEnabled).color(Color.GREEN);
+    }
+
+    public static Message getAutoDisabled() {
+        return Message.raw(getLang().prefix + getLang().autoDisabled).color(Color.RED);
+    }
+
+    public static Message getNoticeEnabled() {
+        return Message.raw(getLang().prefix + getLang().noticeEnabled).color(Color.GREEN);
+    }
+
+    public static Message getNoticeDisabled() {
+        return Message.raw(getLang().prefix + getLang().noticeDisabled).color(Color.RED);
+    }
+
+    public static Message getCleanupFinishedEnabled() {
+        return Message.raw(getLang().prefix + getLang().cleanupFinishedEnabled).color(Color.GREEN);
+    }
+
+    public static Message getCleanupFinishedDisabled() {
+        return Message.raw(getLang().prefix + getLang().cleanupFinishedDisabled).color(Color.RED);
+    }
 }

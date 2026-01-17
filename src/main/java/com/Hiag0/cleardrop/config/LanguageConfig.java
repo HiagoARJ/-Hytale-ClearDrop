@@ -84,6 +84,30 @@ public class LanguageConfig {
                                         (config, value, extraInfo) -> config.usageNotice = value,
                                         (config, extraInfo) -> config.usageNotice)
                         .add()
+                        .append(new KeyedCodec<String>("AutoEnabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.autoEnabled = value,
+                                        (config, extraInfo) -> config.autoEnabled)
+                        .add()
+                        .append(new KeyedCodec<String>("AutoDisabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.autoDisabled = value,
+                                        (config, extraInfo) -> config.autoDisabled)
+                        .add()
+                        .append(new KeyedCodec<String>("NoticeEnabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.noticeEnabled = value,
+                                        (config, extraInfo) -> config.noticeEnabled)
+                        .add()
+                        .append(new KeyedCodec<String>("NoticeDisabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.noticeDisabled = value,
+                                        (config, extraInfo) -> config.noticeDisabled)
+                        .add()
+                        .append(new KeyedCodec<String>("CleanupFinishedEnabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.cleanupFinishedEnabled = value,
+                                        (config, extraInfo) -> config.cleanupFinishedEnabled)
+                        .add()
+                        .append(new KeyedCodec<String>("CleanupFinishedDisabled", Codec.STRING),
+                                        (config, value, extraInfo) -> config.cleanupFinishedDisabled = value,
+                                        (config, extraInfo) -> config.cleanupFinishedDisabled)
+                        .add()
                         .build();
 
         public String prefix = "[Clear Drop] ";
@@ -103,8 +127,15 @@ public class LanguageConfig {
         public String helpAuto = "/clear auto <min> - Set cleanup interval";
         public String helpNotice = "/clear notice <sec> - Set warning time";
         public String mustBePositive = "The value must be greater than 0.";
-        public String usageAuto = "Usage: /clear auto <minutes>";
-        public String usageNotice = "Usage: /clear notice <seconds>";
+        public String usageAuto = "Usage: /clear auto <minutes|true|false>";
+        public String usageNotice = "Usage: /clear notice <seconds|true|false>";
+
+        public String autoEnabled = "Only periodic cleaning notifications have been enabled.";
+        public String autoDisabled = "Only the periodic cleaning notifications have been disabled.";
+        public String noticeEnabled = "Pre-cleaning warnings have been activated.";
+        public String noticeDisabled = "Warnings before cleaning have been disabled.";
+        public String cleanupFinishedEnabled = "Notification of how many items have been cleaned has been activated.";
+        public String cleanupFinishedDisabled = "The notification indicating how many items were cleaned has been removed.";
 
         public LanguageConfig() {
         }

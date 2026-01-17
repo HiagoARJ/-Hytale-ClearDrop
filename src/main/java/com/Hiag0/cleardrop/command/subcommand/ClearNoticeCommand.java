@@ -12,26 +12,42 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class ClearNoticeCommand extends AbstractAsyncCommand {
 
-    private final RequiredArg<Integer> secondsArg;
+    private final RequiredArg<String> args;
 
     public ClearNoticeCommand() {
-        super("notice", "Set the warning time");
-        this.secondsArg = this.withRequiredArg("seconds", "Seconds of warning", ArgTypes.INTEGER);
+        super("notice", "Set warning time or toggle notifications");
+        this.args = this.withRequiredArg("value", "Seconds or true/false", ArgTypes.STRING);
     }
 
     @NonNullDecl
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
-        int seconds = secondsArg.get(ctx);
-        if (seconds <= 0) {
-            ctx.sendMessage(Messages.getMustBePositive().color(Color.RED));
-            return CompletableFuture.completedFuture(null);
+        String value = args.get(ctx);
+
+        try {
+            int seconds = Integer.parseInt(value);
+            if (seconds <= 0) {
+                ctx.sendMessage(Messages.getMustBePositive().color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            ClearDrop.CONFIG.get().setCleanupWarningSeconds(seconds);
+            ClearDrop.CONFIG.save();
+
+            ctx.sendMessage(Messages.warningChanged(seconds).color(Color.GREEN));
+        } catch (NumberFormatException e) {
+            if (value.equalsIgnoreCase("true")) {
+                ClearDrop.CONFIG.get().setNotificationNoticeEnabled(true);
+                ClearDrop.CONFIG.save();
+                ctx.sendMessage(Messages.getNoticeEnabled());
+            } else if (value.equalsIgnoreCase("false")) {
+                ClearDrop.CONFIG.get().setNotificationNoticeEnabled(false);
+                ClearDrop.CONFIG.save();
+                ctx.sendMessage(Messages.getNoticeDisabled());
+            } else {
+                ctx.sendMessage(Messages.getUsageNotice());
+            }
         }
-
-        ClearDrop.CONFIG.get().setCleanupWarningSeconds(seconds);
-        ClearDrop.CONFIG.save();
-
-        ctx.sendMessage(Messages.warningChanged(seconds).color(Color.GREEN));
         return CompletableFuture.completedFuture(null);
     }
 }

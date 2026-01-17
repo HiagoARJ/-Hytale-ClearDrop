@@ -26,7 +26,7 @@ public class ClearDrop extends JavaPlugin {
         LANG_CONFIG.save();
 
         // Initialize Cleanup Service using loaded config
-        this.cleanupService = new CleanupService(CONFIG.get(), this);
+        this.cleanupService = new CleanupService(this);
 
         // Schedule Tasks
         cleanupService.scheduleCleanup();

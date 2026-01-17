@@ -1,6 +1,7 @@
 package com.Hiag0.cleardrop.command;
 
 import com.Hiag0.cleardrop.command.subcommand.ClearAutoCommand;
+import com.Hiag0.cleardrop.command.subcommand.ClearCleanupFinishedCommand;
 import com.Hiag0.cleardrop.command.subcommand.ClearNoticeCommand;
 import com.Hiag0.cleardrop.command.subcommand.ClearNowCommand;
 import com.Hiag0.cleardrop.messages.Messages;
@@ -18,6 +19,7 @@ public class ClearCommand extends AbstractAsyncCommand {
         this.addSubCommand(new ClearNowCommand(cleanupService));
         this.addSubCommand(new ClearAutoCommand(cleanupService));
         this.addSubCommand(new ClearNoticeCommand());
+        this.addSubCommand(new ClearCleanupFinishedCommand());
     }
 
     @NonNullDecl

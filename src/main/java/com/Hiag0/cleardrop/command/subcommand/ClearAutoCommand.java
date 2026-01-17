@@ -14,28 +14,47 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 public class ClearAutoCommand extends AbstractAsyncCommand {
 
     private final CleanupService cleanupService;
-    private final RequiredArg<Integer> minutesArg;
+    private final RequiredArg<String> args;
 
     public ClearAutoCommand(CleanupService cleanupService) {
-        super("auto", "Set the automatic cleanup interval");
+        super("auto", "Set cleanup interval or toggle notifications");
         this.cleanupService = cleanupService;
-        this.minutesArg = this.withRequiredArg("minutes", "Interval in minutes", ArgTypes.INTEGER);
+        this.args = this.withRequiredArg("value", "Minutes or true/false", ArgTypes.STRING);
     }
 
     @NonNullDecl
     @Override
     protected CompletableFuture<Void> executeAsync(CommandContext ctx) {
-        int minutes = minutesArg.get(ctx);
-        if (minutes <= 0) {
-            ctx.sendMessage(Messages.getMustBePositive().color(Color.RED));
+        String value = args.get(ctx);
+
+        // Try to parse as integer (minutes)
+        try {
+            int minutes = Integer.parseInt(value);
+            if (minutes <= 0) {
+                ctx.sendMessage(Messages.getMustBePositive().color(Color.RED));
+                return CompletableFuture.completedFuture(null);
+            }
+
+            ClearDrop.CONFIG.get().setMinutesExecution(minutes);
+            ClearDrop.CONFIG.save();
+            cleanupService.reschedule();
+
+            ctx.sendMessage(Messages.intervalChanged(minutes).color(Color.GREEN));
             return CompletableFuture.completedFuture(null);
+        } catch (NumberFormatException e) {
+            // Not a number, check for boolean
+            if (value.equalsIgnoreCase("true")) {
+                ClearDrop.CONFIG.get().setNotificationAutoEnabled(true);
+                ClearDrop.CONFIG.save();
+                ctx.sendMessage(Messages.getAutoEnabled());
+            } else if (value.equalsIgnoreCase("false")) {
+                ClearDrop.CONFIG.get().setNotificationAutoEnabled(false);
+                ClearDrop.CONFIG.save();
+                ctx.sendMessage(Messages.getAutoDisabled());
+            } else {
+                ctx.sendMessage(Messages.getUsageAuto());
+            }
         }
-
-        ClearDrop.CONFIG.get().setMinutesExecution(minutes);
-        ClearDrop.CONFIG.save();
-        cleanupService.reschedule();
-
-        ctx.sendMessage(Messages.intervalChanged(minutes).color(Color.GREEN));
         return CompletableFuture.completedFuture(null);
     }
 }

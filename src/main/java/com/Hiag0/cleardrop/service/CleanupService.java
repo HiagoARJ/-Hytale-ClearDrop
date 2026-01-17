@@ -24,29 +24,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import com.Hiag0.cleardrop.ClearDrop;
+
 public class CleanupService {
 
-    private final ClearDropConfig config;
     private final JavaPlugin plugin;
     private ScheduledFuture<?> scheduledTask;
 
-    public CleanupService(ClearDropConfig config, JavaPlugin plugin) {
-        this.config = config;
+    public CleanupService(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void scheduleCleanup() {
-        if (config.getMinutesExecution() <= 0)
+        if (ClearDrop.CONFIG.get().getMinutesExecution() <= 0)
             return;
 
         // Schedule periodic execution
         this.scheduledTask = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(
                 this::startCleanupCycle,
-                config.getMinutesExecution(),
-                config.getMinutesExecution(),
+                ClearDrop.CONFIG.get().getMinutesExecution(),
+                ClearDrop.CONFIG.get().getMinutesExecution(),
                 TimeUnit.MINUTES);
 
-        broadcast(Messages.scheduleInfo(config.getMinutesExecution()));
+        if (ClearDrop.CONFIG.get().isNotificationAutoEnabled()) {
+            broadcast(Messages.scheduleInfo(ClearDrop.CONFIG.get().getMinutesExecution()));
+        }
     }
 
     public void cancelTask() {
@@ -62,11 +64,15 @@ public class CleanupService {
     }
 
     public void startCleanupCycle() {
-        int warningSeconds = config.getCleanupWarningSeconds();
-        broadcast(Messages.warning(warningSeconds));
+        int warningSeconds = ClearDrop.CONFIG.get().getCleanupWarningSeconds();
+        if (ClearDrop.CONFIG.get().isNotificationNoticeEnabled()) {
+            broadcast(Messages.warning(warningSeconds));
+        }
 
         HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-            broadcast(Messages.getCleanupStarted());
+            if (ClearDrop.CONFIG.get().isNotificationNoticeEnabled()) {
+                broadcast(Messages.getCleanupStarted());
+            }
             executeFullCleanup();
         }, warningSeconds, TimeUnit.SECONDS);
     }
@@ -92,7 +98,9 @@ public class CleanupService {
             plugin.getLogger().at(Level.SEVERE).log("[ClearDrop] Error executing scheduled cleanup: " + e.getMessage());
         }
 
-        broadcast(Messages.nextCleanup(config.getMinutesExecution()));
+        if (ClearDrop.CONFIG.get().isNotificationAutoEnabled()) {
+            broadcast(Messages.nextCleanup(ClearDrop.CONFIG.get().getMinutesExecution()));
+        }
     }
 
     public void performWorldRemoval(World world) {
@@ -105,7 +113,9 @@ public class CleanupService {
             return;
 
         Store<EntityStore> store = entityStore.getStore();
-        broadcast(Messages.manualCleanupStart(worldName));
+        if (ClearDrop.CONFIG.get().isNotificationCleanupFinishedEnabled()) {
+            broadcast(Messages.manualCleanupStart(worldName));
+        }
 
         final AtomicInteger totalAnalyzed = new AtomicInteger(0);
         final ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> removalQueue = new ConcurrentLinkedQueue<>();
@@ -139,7 +149,9 @@ public class CleanupService {
             pw.println("-------------------------------------------");
             pw.flush();
 
-            broadcast(Messages.cleanupFinished(worldName, finalRemoved));
+            if (ClearDrop.CONFIG.get().isNotificationCleanupFinishedEnabled()) {
+                broadcast(Messages.cleanupFinished(worldName, finalRemoved));
+            }
 
         } catch (Exception e) {
             plugin.getLogger().at(Level.SEVERE).log("[ClearDrop] Error writing debug log: " + e.getMessage());
