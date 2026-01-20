@@ -28,6 +28,13 @@ public class ClearDropConfig {
                     (config, value, extraInfo) -> config.notificationCleanupFinishedEnabled = value,
                     (config, extraInfo) -> config.notificationCleanupFinishedEnabled)
             .add()
+            .append(new KeyedCodec<String[]>("ExcludedItems", Codec.STRING_ARRAY),
+                    (config, value,
+                            extraInfo) -> config.excludedItems = value != null
+                                    ? new java.util.ArrayList<>(java.util.Arrays.asList(value))
+                                    : new java.util.ArrayList<>(),
+                    (config, extraInfo) -> config.excludedItems.toArray(new String[0]))
+            .add()
             .build();
 
     private int minutesExecution = 1;
@@ -35,6 +42,8 @@ public class ClearDropConfig {
     private boolean notificationAutoEnabled = true;
     private boolean notificationNoticeEnabled = true;
     private boolean notificationCleanupFinishedEnabled = true;
+
+    private java.util.List<String> excludedItems = new java.util.ArrayList<>();
 
     public ClearDropConfig() {
     }
@@ -77,5 +86,13 @@ public class ClearDropConfig {
 
     public void setNotificationCleanupFinishedEnabled(boolean notificationCleanupFinishedEnabled) {
         this.notificationCleanupFinishedEnabled = notificationCleanupFinishedEnabled;
+    }
+
+    public java.util.List<String> getExcludedItems() {
+        return excludedItems;
+    }
+
+    public void setExcludedItems(java.util.List<String> excludedItems) {
+        this.excludedItems = excludedItems;
     }
 }

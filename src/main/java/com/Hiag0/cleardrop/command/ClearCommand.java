@@ -14,12 +14,15 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 public class ClearCommand extends AbstractAsyncCommand {
 
     public ClearCommand(CleanupService cleanupService) {
-        super("clear", "Main command of ClearDrops");
+        super("cleardrop", "Main command of ClearDrops");
 
         this.addSubCommand(new ClearNowCommand(cleanupService));
         this.addSubCommand(new ClearAutoCommand(cleanupService));
         this.addSubCommand(new ClearNoticeCommand());
         this.addSubCommand(new ClearCleanupFinishedCommand());
+        // this.addSubCommand(new
+        // com.Hiag0.cleardrop.command.subcommand.ClearGuiCommand()); // Removed as per
+        // user request
     }
 
     @NonNullDecl

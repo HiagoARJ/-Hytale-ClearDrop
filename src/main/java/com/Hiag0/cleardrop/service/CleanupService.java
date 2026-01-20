@@ -12,12 +12,9 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.modules.entity.DespawnComponent;
+import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -119,83 +116,95 @@ public class CleanupService {
 
         final AtomicInteger totalAnalyzed = new AtomicInteger(0);
         final ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> removalQueue = new ConcurrentLinkedQueue<>();
-        File logFile = new File(plugin.getDataDirectory().toFile(), "cleardrop_debug.log");
 
-        try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
-            pw.println("--- Starting Hybrid Scan: " + new Date() + " ---");
+        // CSV Logging disabled as per user request
 
-            store.forEachEntityParallel(
-                    (int index, ArchetypeChunk<EntityStore> chunk, CommandBuffer<EntityStore> buffer) -> {
-                        totalAnalyzed.incrementAndGet();
-                        com.hypixel.hytale.component.Archetype<EntityStore> arch = chunk.getArchetype();
+        store.forEachEntityParallel(
+                (int index, ArchetypeChunk<EntityStore> chunk, CommandBuffer<EntityStore> buffer) -> {
+                    totalAnalyzed.incrementAndGet();
+                    com.hypixel.hytale.component.Archetype<EntityStore> arch = chunk.getArchetype();
 
-                        if (arch != null) {
-                            processArchetype(index, arch, chunk, removalQueue, pw);
-                        }
-                    });
+                    if (arch != null) {
+                        processArchetype(index, arch, chunk, removalQueue, worldName);
+                    }
+                });
 
-            // Remove marked entities
-            int removedSubtotal = 0;
-            for (com.hypixel.hytale.component.Ref<EntityStore> ref : removalQueue) {
-                try {
-                    store.removeEntity(ref, RemoveReason.REMOVE);
-                    removedSubtotal++;
-                } catch (Exception ignored) {
-                }
+        // Remove marked entities
+        int removedSubtotal = 0;
+        for (com.hypixel.hytale.component.Ref<EntityStore> ref : removalQueue) {
+            try {
+                store.removeEntity(ref, RemoveReason.REMOVE);
+                removedSubtotal++;
+            } catch (Exception ignored) {
             }
+        }
 
-            final int finalRemoved = removedSubtotal;
-            pw.println("Scan finished. Analyzed: " + totalAnalyzed.get() + " | Removed: " + finalRemoved);
-            pw.println("-------------------------------------------");
-            pw.flush();
+        final int finalRemoved = removedSubtotal;
 
-            if (ClearDrop.CONFIG.get().isNotificationCleanupFinishedEnabled()) {
-                broadcast(Messages.cleanupFinished(worldName, finalRemoved));
-            }
-
-        } catch (Exception e) {
-            plugin.getLogger().at(Level.SEVERE).log("[ClearDrop] Error writing debug log: " + e.getMessage());
+        if (ClearDrop.CONFIG.get().isNotificationCleanupFinishedEnabled()) {
+            broadcast(Messages.cleanupFinished(worldName, finalRemoved));
         }
     }
 
     private void processArchetype(int index, com.hypixel.hytale.component.Archetype<EntityStore> arch,
             ArchetypeChunk<EntityStore> chunk,
             ConcurrentLinkedQueue<com.hypixel.hytale.component.Ref<EntityStore>> removalQueue,
-            PrintWriter pw) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Index ").append(index).append(" [");
+            String worldName) {
+        // StringBuilder componentsSb = new StringBuilder(); // Not needed if not
+        // logging
 
         int count = arch.count();
-        int matches = 0;
-        boolean hasInvalid = false;
+        boolean hasDespawnComponent = false;
+        String itemId = null;
 
-        for (int j = 0; j < count; j++) {
-            com.hypixel.hytale.component.ComponentType<EntityStore, ?> ct = arch.get(j);
-            if (ct != null) {
-                Class<?> compClass = ct.getTypeClass();
-                if (compClass != null) {
-                    String name = compClass.getSimpleName();
-                    sb.append(name).append(" ");
+        try {
+            java.lang.reflect.Field componentsField = com.hypixel.hytale.component.ArchetypeChunk.class
+                    .getDeclaredField("components");
+            componentsField.setAccessible(true);
+            Object[][] componentsArray = (Object[][]) componentsField.get(chunk);
 
-                    if (isAllowedComponent(name)) {
-                        if (!name.equals("TransformComponent")) {
-                            matches++;
+            int loopCount = Math.max(count, componentsArray.length);
+
+            for (int j = 0; j < loopCount; j++) {
+                Object componentObj = null;
+
+                if (j < componentsArray.length) {
+                    Object[] specificComponentArray = componentsArray[j];
+                    if (specificComponentArray != null && index < specificComponentArray.length) {
+                        componentObj = specificComponentArray[index];
+                    }
+                }
+
+                if (componentObj != null) {
+                    if (componentObj instanceof DespawnComponent) {
+                        hasDespawnComponent = true;
+                        // DespawnComponent dc = (DespawnComponent) componentObj;
+                    } else if (componentObj instanceof ItemComponent) {
+                        ItemComponent ic = (ItemComponent) componentObj;
+                        if (ic.getItemStack() != null) {
+                            itemId = ic.getItemStack().getItemId();
                         }
-                    } else {
-                        hasInvalid = true;
                     }
                 }
             }
-        }
-        sb.append("][").append(count).append("]");
 
-        if ((count >= 11 && count <= 13) || (!hasInvalid && matches == 3 && count <= 4)) {
-            removalQueue.add(chunk.getReferenceTo(index));
-            sb.append(" <<< MARKED FOR REMOVAL >>>");
+        } catch (Exception e) {
+            // componentsSb.append("ReflectionError: ").append(e.getMessage());
         }
 
-        synchronized (pw) {
-            pw.println(sb.toString());
+        // Strict removal condition: Check for DespawnComponent AND not excluded
+        if (hasDespawnComponent) {
+            boolean isExcluded = false;
+            if (itemId != null) {
+                java.util.List<String> excludedList = ClearDrop.CONFIG.get().getExcludedItems();
+                if (excludedList != null && excludedList.contains(itemId)) {
+                    isExcluded = true;
+                }
+            }
+
+            if (!isExcluded) {
+                removalQueue.add(chunk.getReferenceTo(index));
+            }
         }
     }
 
